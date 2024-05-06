@@ -3,6 +3,13 @@ project(Hotspots)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+# set C++ compiler to clang++
+#set(CMAKE_CXX_COMPILER /opt/homebrew/Cellar/llvm/17.0.6_1/bin/clang++)
+# set(CMAKE_CXX_COMPILER clang++)
+
+
+# print C++ compiler being used
+message(STATUS "Using C++ compiler: ${CMAKE_CXX_COMPILER}")
 
 find_program(JEMALLOC_FOUND jemalloc-config)
 if(JEMALLOC_FOUND)
@@ -14,12 +21,15 @@ if(JEMALLOC_FOUND)
 endif()
 
 include(FetchContent)
-FetchContent_Declare(
-	parlaylib
-	GIT_REPOSITORY https://github.com/cmuparlay/parlaylib.git
-	GIT_TAG master
-)
-FetchContent_MakeAvailable(parlaylib)
+# FetchContent_Declare(
+# 	parlaylib
+# 	GIT_REPOSITORY https://github.com/cmuparlay/parlaylib.git
+# 	GIT_TAG master
+# )
+# FetchContent_MakeAvailable(parlaylib)
+# list(APPEND CMAKE_PREFIX_PATH "/Users/movsesyanae/Programming/CMSC858N/parlaylib/build")
+# find_package(Parlay REQUIRED)
+
 
 if(NOT EXISTS "${CMAKE_BINARY_DIR}/graph_data/youtube_sym.adj")
 	set(GRAPH_FILE "${CMAKE_BINARY_DIR}/graph_data.tar.bz2")
@@ -45,5 +55,8 @@ file(REMOVE ${GRAPH_FILE})
 endif()
 
 add_executable(hotspots hotspots.cpp)
+# set parlaylib_SOURCE_DIR to /Users/movsesyanae/Programming/CMSC858N/parlaylib
+set(parlaylib_SOURCE_DIR "/Users/movsesyanae/Programming/CMSC858N/parlaylib")
+
 target_include_directories(hotspots PRIVATE ${parlaylib_SOURCE_DIR} ${parlaylib_SOURCE_DIR}/include/)
 target_link_libraries(hotspots PRIVATE ${JEMALLOC_LIBS} "-pthread")
