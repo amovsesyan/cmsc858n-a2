@@ -3,10 +3,6 @@ project(Hotspots)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-# set C++ compiler to clang++
-#set(CMAKE_CXX_COMPILER /opt/homebrew/Cellar/llvm/17.0.6_1/bin/clang++)
-# set(CMAKE_CXX_COMPILER clang++)
-
 
 # print C++ compiler being used
 message(STATUS "Using C++ compiler: ${CMAKE_CXX_COMPILER}")
@@ -55,6 +51,7 @@ file(REMOVE ${GRAPH_FILE})
 endif()
 
 add_executable(hotspots hotspots.cpp)
+# Using an externally built parlay
 # set parlaylib_SOURCE_DIR to /Users/movsesyanae/Programming/CMSC858N/parlaylib
 set(parlaylib_SOURCE_DIR "/Users/movsesyanae/Programming/CMSC858N/parlaylib")
 

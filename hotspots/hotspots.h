@@ -35,58 +35,48 @@ auto hotspots(parlay::sequence<vertex> U, const graph& G) {
 	// initialize sets
 	// graph is defined as a sequence of sequence of ints
 	// so in the frontiers we'll store the indices of the vertexes
-	parlay::hashtable<parlay::hash_numeric<vertex>>* frontier = new parlay::hashtable(G.size(), parlay::hash_numeric<vertex>{});
-	std::cout << "frontier length: " <<  frontier->count() << std::endl;
-	parlay::hashtable<parlay::hash_numeric<vertex>>*  next_frontier;
+	parlay::sequence<vertex>* frontier = new parlay::sequence<vertex>();
+	parlay::sequence<vertex>* next_frontier = new parlay::sequence<vertex>();
+
+	parlay::sequence<bool> visited(G.size(), false);
 
 	// add U as first frontier
-//	parlay::parallel_for(0, U.size(), [&] (long i) {
-//		frontier->insert(U[i]);
-//	});
-	for(long i = 0; i < U.size(); i++) {
-		frontier->insert(U[i]);
-	}
+	parlay::parallel_for(0, U.size(), [&] (long i) {
+		frontier->push_back(U[i]);
+	});
 
-//	while (frontier->count() > 0) {
-//		next_frontier = new parlay::hashtable(G.size(), parlay::hash_numeric<vertex>{});
-//
-////		auto frontier_indices = frontier->get_index();
-//		auto frontier_entries = frontier->entries();
-//
-////		parlay::parallel_for(0, frontier_entries.size(), [&] (long i) {
-////			// get sequence of vertices representing the neighbour of the current vertex
-////			parlay::sequence<vertex> neighbours = G[frontier_entries[i]];
-////			// get hotspot
-////			vertex nearest_hotspot = nearest[frontier_entries[i]];
-////			parlay::parallel_for(0, neighbours.size(), [&] (long j) {
-////				vertex neighbour = neighbours[j];
-////				nearest[neighbour] = nearest_hotspot;
-////				next_frontier->insert(neighbour);
-////			});
-////		});
-// 		for(long i = 0; i < frontier_entries->size(); i++) {
-//			// get sequence of vertices representing the neighbour of the current vertex
-//			parlay::sequence<vertex> neighbours = G[frontier_entries[i]];
-//			// get hotspot
-//			vertex nearest_hotspot = nearest[frontier_entries[i]];
-//			for(long j = 0; j < neighbours.size(); j++) {
-//				vertex neighbour = neighbours[j];
-//				nearest[neighbour] = nearest_hotspot;
-//				next_frontier->insert(neighbour);
-//			}
-//		}
-//
-//		// swap next frontier and frontier
-//		auto tmp = next_frontier;
-//		next_frontier = frontier;
-//		frontier = tmp;
-//
-//		// reset next frontier -- currently doing this by deleting and reallocating at the beggining
-//		delete next_frontier;
-//	}
+	while (frontier->size() > 0) {
+
+ 		for(long i = 0; i < frontier->size(); i++) {
+			// get sequence of vertices representing the neighbour of the current vertex
+			vertex current_vertex = frontier[0][i];
+			parlay::sequence<vertex> neighbours = G[current_vertex];
+			// get hotspot
+			vertex nearest_hotspot = nearest[current_vertex];
+			for(long j = 0; j < neighbours.size(); j++) {
+				vertex neighbour = neighbours[j];
+				if(!visited[neighbour]) {
+					visited[neighbour] = true;
+					nearest[neighbour] = nearest_hotspot;
+					next_frontier->push_back(neighbour);
+				}
+
+			}
+		}
+
+		// swap next frontier and frontier
+		auto tmp = next_frontier;
+		next_frontier = frontier;
+		frontier = tmp;
+
+		// reset next frontier
+		next_frontier->clear();
+	}
 
 	// cleanup -- delete frontier
 	delete frontier;
+	delete next_frontier;
+//	delete visited;
 
 
 	// to be filled in
