@@ -25,8 +25,9 @@ auto hotspots(parlay::sequence<vertex> U, const graph& G) {
 	// 		for v in frontier
 	//
 	// 			for n in v.neighbours
-	// 				nearest[n] = nearest[v];
-	// 				next_frontier.add(n);
+	//				if n is not visited
+	// 					nearest[n] = nearest[v];
+	// 					next_frontier.add(n);
 	// 		frontier = next_frontier
 	//		next_frontier = {}
 
@@ -34,7 +35,7 @@ auto hotspots(parlay::sequence<vertex> U, const graph& G) {
 
 	// initialize sets
 	// graph is defined as a sequence of sequence of ints
-	// so in the frontiers we'll store the indices of the vertexes
+	// so in the frontiers we'll store the vertices
 	parlay::sequence<vertex>* frontier = new parlay::sequence<vertex>();
 	parlay::sequence<vertex>* next_frontier = new parlay::sequence<vertex>();
 
@@ -50,10 +51,10 @@ auto hotspots(parlay::sequence<vertex> U, const graph& G) {
  		for(long i = 0; i < frontier->size(); i++) {
 			// get sequence of vertices representing the neighbour of the current vertex
 			vertex current_vertex = frontier[0][i];
-			parlay::sequence<vertex> neighbours = G[current_vertex];
+			auto neighbours = G[current_vertex];
 			// get hotspot
 			vertex nearest_hotspot = nearest[current_vertex];
-			for(long j = 0; j < neighbours.size(); j++) {
+			parlay::parallel_for(0, neighbours.size(), [&] (long j) {
 				vertex neighbour = neighbours[j];
 				if(!visited[neighbour]) {
 					visited[neighbour] = true;
@@ -61,7 +62,7 @@ auto hotspots(parlay::sequence<vertex> U, const graph& G) {
 					next_frontier->push_back(neighbour);
 				}
 
-			}
+			});
 		}
 
 		// swap next frontier and frontier
